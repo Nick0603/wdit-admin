@@ -1,25 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+import * as React from "react";
+import jsonServerProvider from 'ra-data-json-server';
+import { fetchUtils, Admin, Resource } from 'react-admin';
+import Users from './users';
+import { NotificationEditor, NotificationList, NotificationCreator} from './notifications';
+import { authProvider } from './auth';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const API_DOMAIN = process.env.REACT_APP_API_DOMAIN;
+const httpClient = (url, options = {}) => {
+  if (!options.headers) {
+      options.headers = new Headers({ Accept: 'application/json' });
+  }
+  const token = localStorage.getItem('token');
+  options.headers.set('Authorization', `Bearer ${token}`);
+  return fetchUtils.fetchJson(url, options);
+};
+const dataProvider = jsonServerProvider(`${API_DOMAIN}/admin`, httpClient);
 
+const App = () => (
+  <Admin dataProvider={dataProvider} authProvider={authProvider}>
+      <Resource name="users" list={Users} />
+      <Resource name="notifications" list={NotificationList} edit={NotificationEditor} create={NotificationCreator}/>
+  </Admin>
+);
 export default App;
